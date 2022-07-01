@@ -1,0 +1,83 @@
+#!/bin/bash
+GIT=""
+BRANCH=""
+DATABASE=""
+ENV_FILE=""
+BASE_URL="localhost"
+
+green=$(tput setaf 2)
+blue=$(tput setaf 4)
+normal=$(tput sgr0)
+
+#URL, GIT, BRANCH ,DATABASE
+read -p "GIT URL (git src code): " -e -i "git@github.com:katScript/laravel.git" GIT
+read -p "GIT Branch: " -e -i "master" BRANCH
+read -p "DATABASE (you can leave it empty to skip the sql import): " -e -i "mysql/file_name.sql" DATABASE
+read -p "ENV File: " -e -i "env/.env" ENV_FILE
+
+if [ -n "$GIT" ] && [ -n "$BRANCH" ] && [ -n "$ENV_FILE" ];
+then
+    mkdir -p src
+
+    echo "Restart containers to mount files..."
+    sleep 3
+    bin/restart
+    sleep 2
+
+    if [ -z "$DATABASE" ]
+    then
+      echo "${blue}Skip database import...${normal}"
+    else
+      echo "${green}Import database...${normal}"
+      bin/mysql-import $DATABASE
+    fi
+
+    bin/copytocontainer --all
+
+    if hash composer 2>/dev/null; then
+        VERSION=""
+    fi
+
+    if [ -z "$VERSION" ]; then
+        exec < /dev/tty
+        echo
+        echo "    Enter Laravel version:"
+        read -p "        Version: " -e -i "8.0" VERSION
+        exec <&-
+    fi
+
+    if [ -n "$VERSION" ]; then
+        bin/clinotty composer create-project --prefer-dist laravel/laravel:^$VERSION .
+        VERSION=''
+    fi
+
+    bin/clinotty chmod u+x artisan
+
+    echo "${green}copy .env file...${normal}"
+    cp $ENV_FILE src/.env
+    echo "${green}Copying all files from host to container...${normal}"
+
+    bin/clinotty php artisan key:generate --ansi
+
+    bin/copytocontainer --all
+
+    echo "Checking composer..."
+
+    echo "Forcing reinstall of composer deps to ensure perms & reqs..."
+    bin/clinotty composer global require hirak/prestissimo
+    bin/clinotty composer install
+
+    echo "Copying files from container to host after install..."
+    bin/copyfromcontainer app
+    bin/copyfromcontainer vendor
+
+    echo "Create a DNS host entry for the site..."
+    echo "127.0.0.1 ::1 $BASE_URL" | sudo tee -a /etc/hosts
+
+    echo "Generating SSL certificate..."
+    bin/setup-ssl $BASE_URL
+
+    echo "${green}Docker development environment setup complete.${normal}"
+else
+    echo "All fields above are required to setup, please fill..."
+fi

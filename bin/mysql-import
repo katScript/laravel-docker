@@ -1,0 +1,5 @@
+#!/bin/bash
+[ -z "$1" ] && echo "Example: bin/mysql-import mysql/magento.sql" && exit
+
+source env/db.env
+bin/clinotty mysql -hdb -u${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} < "$@"

@@ -1,0 +1,19 @@
+# Version 1.0.0
+version: "3"
+
+services:
+  app:
+    volumes: &appvolumes
+      - ./src:/var/www/html:delegated
+
+  phpfpm:
+    volumes: *appvolumes
+    # Warning: this will impact your debug functionality
+    # Linux only: host.docker.internal doesn't exist https://github.com/docker/for-linux/issues/264
+    # Uncomment two lines below & replace IP with result of: docker run --rm alpine ip route | awk 'NR==1 {print $3}'
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+
+  # Disabling cron by default as it uses higher CPU, enable if needed
+  #cron:
+  #  volumes: *appvolumes
