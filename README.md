@@ -55,7 +55,3 @@ Redis is now the default cache and session storage engine, and is automatically 
 ### Linux
 
 Running Docker on Linux should be pretty straight-forward. Note that you need to run some [***Post install commands***](https://docs.docker.com/install/linux/linux-postinstall/) as well as [***installing Docker Compose***](https://docs.docker.com/compose/install). These steps are taken care of automatically with Docker Desktop, but not on Linux.
-
-## License
-
-[MIT](https://opensource.org/licenses/MIT)
