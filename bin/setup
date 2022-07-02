@@ -11,7 +11,9 @@ mkdir -p src
 
 echo "Restarting the containers..."
 bin/restart
-sleep 3
+sleep 5
+
+bin/fixowns
 
 echo "Installing laravel via composer..."
 bin/clinotty composer create-project --prefer-dist laravel/laravel:^$VERSION .

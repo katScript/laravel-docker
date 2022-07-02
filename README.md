@@ -44,7 +44,7 @@ There are lots of commands you can use in bin folder.
 - `bin/mysql-import`: Import database.
 - `bin/bash`: Drop into the bash prompt of your phpfpm Docker container. The `phpfpm` container should be mainly used to access the filesystem within Docker.
 - `bin/cli`: Run any CLI command without going into the bash prompt. Ex. `bin/cli ls`.
-- `bin/clinotty`: Run any CLI command with no TTY. Ex: `bin/clinotty chmod u+x bin/artisan`.
+- `bin/clinotty`: Run any CLI command with no TTY. Ex: `bin/clinotty chmod u+x artisan`.
 - `bin/fixowns`: This will fix filesystem ownerships within the container.
 - `bin/fixperms`: This will fix filesystem permissions within the container.
 
