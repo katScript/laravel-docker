@@ -53,6 +53,9 @@ then
     echo "${green}Generating laravel app key...${normal}"
     bin/clinotty php artisan key:generate --ansi
 
+    echo "${green}Pull the code & switch the branch...${normal}"
+    bin/git-init $GIT $BRANCH
+
     echo "${green}Copying all files from host to container...${normal}"
     bin/copytocontainer --all
 
