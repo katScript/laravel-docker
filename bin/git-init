@@ -3,9 +3,9 @@
 GIT_BRANCH=${2:-master}
 
 REAL_SRC=$(cd -P "src" && pwd)
+find $REAL_SRC -type f -exec chmod u+w {} \;
 
 cd $REAL_SRC
 git init
 git remote add origin $1
 git checkout -b $GIT_BRANCH
-git pull origin $GIT_BRANCH
