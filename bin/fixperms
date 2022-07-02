@@ -2,9 +2,9 @@
 echo "Correcting filesystem permissions..."
 
 if [ -z "$1" ]; then
-  bin/clinotty find var vendor pub/static pub/media app/etc -type f -exec chmod u+w {} \;
-  bin/clinotty find var vendor pub/static pub/media app/etc -type d -exec chmod u+w {} \;
-  bin/clinotty chmod u+x bin/magento
+  bin/clinotty find public vendor resources -type f -exec chmod u+w {} \;
+  bin/clinotty find public vendor resources -type d -exec chmod u+w {} \;
+  bin/clinotty chmod u+x artisan
 else
   bin/clinotty find $1 -type f -exec chmod u+w {} \;
   bin/clinotty find $1 -type d -exec chmod u+w {} \;
