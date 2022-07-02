@@ -41,7 +41,7 @@ then
     exec <&-
 
     echo
-    echo "Installing laravel via composer..."
+    echo "${blue}Installing laravel via composer...${normal}"
     bin/clinotty composer create-project --prefer-dist laravel/laravel:^$VERSION .
     VERSION=''
 
