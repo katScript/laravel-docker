@@ -25,7 +25,7 @@ then
 
     echo "Restart containers to mount files..."
     bin/restart
-    sleep 5
+    sleep 10
 
     if [ -z "$DATABASE" ]
     then
@@ -35,23 +35,28 @@ then
       bin/mysql-import $DATABASE
     fi
 
+    bin/fixowns
+
     exec < /dev/tty
     echo
     read -p "${green}Enter Laravel version: ${normal}" -e -i "8.0" VERSION
     exec <&-
 
-    echo
-    echo "${blue}Installing laravel via composer...${normal}"
-    bin/clinotty composer create-project --prefer-dist laravel/laravel:^$VERSION .
-    VERSION=''
+    if [ -n "$VERSION" ];
+    then
+      echo "${blue}Installing laravel via composer...${normal}"
 
-    bin/clinotty chmod u+x artisan
+      bin/clinotty composer create-project --prefer-dist laravel/laravel:^$VERSION .
+      VERSION=''
 
-    echo "${green}Copy .env file...${normal}"
-    cp $ENV_FILE src/.env
+      bin/clinotty chmod u+x artisan
 
-    echo "${green}Generating laravel app key...${normal}"
-    bin/clinotty php artisan key:generate --ansi
+      echo "${green}Copy .env file...${normal}"
+      cp $ENV_FILE src/.env
+
+      echo "${green}Generating laravel app key...${normal}"
+      bin/clinotty php artisan key:generate --ansi
+    fi
 
     echo "${green}Pull the code & switch the branch...${normal}"
     bin/git-init $GIT $BRANCH
