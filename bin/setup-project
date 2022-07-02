@@ -25,7 +25,7 @@ then
 
     echo "Restart containers to mount files..."
     bin/restart
-    sleep 10
+    sleep 5
 
     if [ -z "$DATABASE" ]
     then
