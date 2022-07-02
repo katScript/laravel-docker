@@ -3,7 +3,8 @@ GIT=""
 BRANCH=""
 DATABASE=""
 ENV_FILE=""
-BASE_URL="localhost"
+BASE_URL=""
+VERSION=""
 
 green=$(tput setaf 2)
 blue=$(tput setaf 4)
@@ -14,15 +15,17 @@ read -p "GIT URL (git src code): " -e -i "git@github.com:katScript/laravel.git" 
 read -p "GIT Branch: " -e -i "master" BRANCH
 read -p "DATABASE (you can leave it empty to skip the sql import): " -e -i "mysql/file_name.sql" DATABASE
 read -p "ENV File: " -e -i "env/.env" ENV_FILE
+read -p "BASE_URL: " -e -i "localhost" BASE_URL
 
-if [ -n "$GIT" ] && [ -n "$BRANCH" ] && [ -n "$ENV_FILE" ];
+if [ -n "$GIT" ] && [ -n "$BRANCH" ] && [ -n "$ENV_FILE" ] && [ -n "$BASE_URL" ];
 then
+    echo "Removing src & creating empty src folder..."
+    rm -rf src
     mkdir -p src
 
     echo "Restart containers to mount files..."
-    sleep 3
     bin/restart
-    sleep 2
+    sleep 5
 
     if [ -z "$DATABASE" ]
     then
@@ -32,33 +35,25 @@ then
       bin/mysql-import $DATABASE
     fi
 
-    bin/copytocontainer --all
+    exec < /dev/tty
+    echo
+    read -p "${green}Enter Laravel version: ${normal}" -e -i "8.0" VERSION
+    exec <&-
 
-    if hash composer 2>/dev/null; then
-        VERSION=""
-    fi
-
-    if [ -z "$VERSION" ]; then
-        exec < /dev/tty
-        echo
-        echo "    Enter Laravel version:"
-        read -p "        Version: " -e -i "8.0" VERSION
-        exec <&-
-    fi
-
-    if [ -n "$VERSION" ]; then
-        bin/clinotty composer create-project --prefer-dist laravel/laravel:^$VERSION .
-        VERSION=''
-    fi
+    echo
+    echo "Installing laravel via composer..."
+    bin/clinotty composer create-project --prefer-dist laravel/laravel:^$VERSION .
+    VERSION=''
 
     bin/clinotty chmod u+x artisan
 
-    echo "${green}copy .env file...${normal}"
+    echo "${green}Copy .env file...${normal}"
     cp $ENV_FILE src/.env
-    echo "${green}Copying all files from host to container...${normal}"
 
+    echo "${green}Generating laravel app key...${normal}"
     bin/clinotty php artisan key:generate --ansi
 
+    echo "${green}Copying all files from host to container...${normal}"
     bin/copytocontainer --all
 
     echo "Checking composer..."
@@ -78,6 +73,7 @@ then
     bin/setup-ssl $BASE_URL
 
     echo "${green}Docker development environment setup complete.${normal}"
+    echo "You may now access your project at ${green}https://${BASE_URL}/${normal}"
 else
     echo "All fields above are required to setup, please fill..."
 fi
